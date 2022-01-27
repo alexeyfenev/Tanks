@@ -5,12 +5,24 @@ using UnityEngine;
 
 public class Movement : MonoBehaviour
 {
+    Animator animatorL;
+    Animator animatorR;
+    GameObject TrackL;
+    GameObject TrackR;
+
     float speedMoving = 1;
     float speedRotation = 5;
     List<Map> PathMap = new List<Map>();
     float time0;
     float delay = 0.2f;
 
+    private void Start()
+    {
+        TrackL = transform.Find("TrackL").gameObject;
+        TrackR = transform.Find("TrackR").gameObject;
+        animatorL = TrackL.GetComponent<Animator>();
+        animatorR = TrackR.GetComponent<Animator>();
+    }
 
     void Update()
     {
@@ -100,7 +112,6 @@ public class Movement : MonoBehaviour
             }
         }
 
-
         if (!Input.GetKey(KeyCode.W) &&    // Конечный пункт - поворот
             !Input.GetKey(KeyCode.S) &&
             !Input.GetKey(KeyCode.D) &&
@@ -112,8 +123,6 @@ public class Movement : MonoBehaviour
                 PathMap[PathMap.Count - 1] = path;
             }
         }
-
-
 
         if (Input.GetKey(KeyCode.W))
         {
@@ -140,6 +149,9 @@ public class Movement : MonoBehaviour
     {
         if (PathMap.Count != 0)
         {
+            animatorL.SetBool("Going", true); // Начать анимацию
+            animatorR.SetBool("Going", true); // Начать анимацию
+
             if (transform.rotation != PathMap[0].Dir)
             {
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, PathMap[0].Dir, speedRotation);
@@ -164,12 +176,18 @@ public class Movement : MonoBehaviour
                         transform.position = Calibrate(transform.position);
                         
                         PathMap.RemoveAt(0);
+
+                        animatorL.SetBool("Going", false); // Остановить анимацию
+                        animatorR.SetBool("Going", false); // Остановить анимацию
                     }
                 }
                 else
                 {
                     transform.rotation = Calibrate(transform.rotation);
                     PathMap.RemoveAt(0);
+
+                    animatorL.SetBool("Going", false); // Остановить анимацию
+                    animatorR.SetBool("Going", false); // Остановить анимацию
                 }
             }
         }
