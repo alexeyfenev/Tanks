@@ -8,6 +8,9 @@ public class Movement : MonoBehaviour
     float speedMoving = 1;
     float speedRotation = 5;
     List<Map> PathMap = new List<Map>();
+    float time0;
+    float delay = 0.2f;
+
 
     void Update()
     {
@@ -34,30 +37,35 @@ public class Movement : MonoBehaviour
         return newQ;
     }
 
-    void newPath(int Angle)
+    void newPath(int Angle, bool IsJustPressed)
     {
         Map path;
         var newDir = Quaternion.AngleAxis(Angle, Vector3.forward);
 
-        if (transform.rotation != newDir)
+        if (IsJustPressed)
         {
-            path = new Map(newDir, 0);
-            PathMap.Add(path);
-        }
-        else if (PathMap.Count < 10)
-        {
-            if (PathMap.Count == 0)
+            if ((transform.rotation != newDir) && (PathMap.Count == 0))
+            {
+                path = new Map(newDir, 0);
+                time0 = Time.time;
+            }
+            else
             {
                 path = new Map(newDir, 1);
+            }
+
+            if (PathMap.Count < 10)
+            {
                 PathMap.Add(path);
             }
-            else if (PathMap.Count > 1)
+        }
+        else
+        {
+            path = new Map(newDir, 1);
+
+            if ((PathMap.Count < 1) && ((Time.time - time0) > delay))
             {
-                if (PathMap[1].Dir != newDir)
-                {
-                    path = new Map(newDir, 1);
-                    PathMap.Add(path);
-                }
+                PathMap.Add(path);
             }
         }
     }
@@ -66,22 +74,22 @@ public class Movement : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.W))
         {
-            newPath(0);
+            newPath(0, true);
         }
 
         if (Input.GetKeyDown(KeyCode.S))
         {
-            newPath(180);
+            newPath(180, true);
         }
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            newPath(270);
+            newPath(270, true);
         }
 
         if (Input.GetKeyDown(KeyCode.A))
         {
-            newPath(90);
+            newPath(90, true);
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))   // STOP
@@ -93,53 +101,39 @@ public class Movement : MonoBehaviour
         }
 
 
-        if (Input.GetKeyUp(KeyCode.W) ||
-            Input.GetKeyUp(KeyCode.S) ||
-            Input.GetKeyUp(KeyCode.D) ||
-            Input.GetKeyUp(KeyCode.A))
+        if (!Input.GetKey(KeyCode.W) &&    // Конечный пункт - поворот
+            !Input.GetKey(KeyCode.S) &&
+            !Input.GetKey(KeyCode.D) &&
+            !Input.GetKey(KeyCode.A))
         {
-            if (Input.GetKey(KeyCode.W))
+            if ((PathMap.Count >= 2) && (PathMap[PathMap.Count - 1].Dir != PathMap[PathMap.Count - 2].Dir))
             {
-                newPath(0);
-            }
-
-            if (Input.GetKey(KeyCode.S))
-            {
-                newPath(180);
-            }
-
-            if (Input.GetKey(KeyCode.D))
-            {
-                newPath(270);
-            }
-
-            if (Input.GetKey(KeyCode.A))
-            {
-                newPath(90);
+                Map path = new Map(PathMap[PathMap.Count - 1].Dir, 0);
+                PathMap[PathMap.Count - 1] = path;
             }
         }
 
 
 
-        //if (Input.GetKey(KeyCode.W))
-        //{
-        //    newPath(0);
-        //}
+        if (Input.GetKey(KeyCode.W))
+        {
+            newPath(0, false);
+        }
 
-        //if (Input.GetKey(KeyCode.S))
-        //{
-        //    newPath(180);
-        //}
+        if (Input.GetKey(KeyCode.S))
+        {
+            newPath(180, false);
+        }
 
-        //if (Input.GetKey(KeyCode.D))
-        //{
-        //    newPath(270);
-        //}
+        if (Input.GetKey(KeyCode.D))
+        {
+            newPath(270, false);
+        }
 
-        //if (Input.GetKey(KeyCode.A))
-        //{
-        //    newPath(90);
-        //}
+        if (Input.GetKey(KeyCode.A))
+        {
+            newPath(90, false);
+        }
     }
 
     void Move()
@@ -172,7 +166,7 @@ public class Movement : MonoBehaviour
                         PathMap.RemoveAt(0);
                     }
                 }
-                else //if (PathMap[0].Length < 0.1)
+                else
                 {
                     transform.rotation = Calibrate(transform.rotation);
                     PathMap.RemoveAt(0);
