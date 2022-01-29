@@ -32,9 +32,9 @@ public class Movement : MonoBehaviour
 
     Vector3 Calibrate(Vector3 curV3)
     {
-        Vector3 newV3 = new Vector3((float)Math.Round((double)curV3.x, 1),
-                                    (float)Math.Round((double)curV3.y, 1),
-                                    (float)Math.Round((double)curV3.z, 1));
+        Vector3 newV3 = new Vector3((float)Math.Floor((double)curV3.x) + 0.5f,
+                                    (float)Math.Floor((double)curV3.y) + 0.5f,
+                                    (float)Math.Floor((double)curV3.z) + 0.5f);
 
         return newV3;
     }
@@ -96,7 +96,7 @@ public class Movement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            newPath(270, true);
+            newPath(-90, true);
         }
 
         if (Input.GetKeyDown(KeyCode.A))
@@ -136,7 +136,7 @@ public class Movement : MonoBehaviour
 
         if (Input.GetKey(KeyCode.D))
         {
-            newPath(270, false);
+            newPath(-90, false);
         }
 
         if (Input.GetKey(KeyCode.A))
