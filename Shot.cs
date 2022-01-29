@@ -6,22 +6,39 @@ using UnityEngine;
 public class Shot : MonoBehaviour
 {
     public GameObject Shell;
+    
     float speedShot = 1;
     float speedOfShell = 3;
-    float time0 = 0;
+    float timeS0 = 0;
+
+    Animator aFire;
+
+    GameObject curShell;
     List<GameObject> Shells = new List<GameObject>();
 
     void Start()
     {
-
+        aFire = transform.Find("Tower").gameObject.transform.Find("Fire").gameObject.GetComponent<Animator>();
     }
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.Space) && ((Time.time - time0) > speedShot))
+        if (Input.GetKey(KeyCode.Space) && ((Time.time - timeS0) > speedShot))
         {
-            Shells.Add(Instantiate(Shell, transform.position, transform.rotation));
-            time0 = Time.time;
+            // Добавление на сцену анимации огня
+            aFire.SetTrigger("Fire");
+
+            // Добавление на сцену анимации снаряда
+            Vector3 posShell = new Vector3(transform.position.x,
+                                           transform.position.y + 0.6f,
+                                           transform.position.z);
+
+            curShell = Instantiate(Shell, posShell, Quaternion.identity);
+            curShell.transform.RotateAround(transform.position,
+                                            Vector3.forward,
+                                            transform.rotation.eulerAngles.z);
+            Shells.Add(curShell);
+            timeS0 = Time.time;
         }
         Move();
     }
@@ -38,7 +55,6 @@ public class Shot : MonoBehaviour
                 {
                     Destroy(Shells[i]);
                     Shells.RemoveAt(i);
-                    
                 }
             }
         }
