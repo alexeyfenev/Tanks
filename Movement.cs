@@ -49,6 +49,21 @@ public class Movement : MonoBehaviour
         return newQ;
     }
 
+    bool PathISClear()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.up, 0.7f);
+        Debug.DrawRay(transform.position, transform.up * 0.7f, Color.yellow);
+
+        if ((!hit) || (hit.collider.gameObject.tag == "Shell"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     void newPath(int Angle, bool IsJustPressed)
     {
         Map path;
@@ -56,7 +71,7 @@ public class Movement : MonoBehaviour
 
         if (IsJustPressed)
         {
-            if ((transform.rotation != newDir) && (PathMap.Count == 0))
+            if ((transform.rotation.eulerAngles != newDir.eulerAngles) && (PathMap.Count == 0))
             {
                 path = new Map(newDir, 0);
                 time0 = Time.time;
@@ -152,12 +167,15 @@ public class Movement : MonoBehaviour
             animatorL.SetBool("Going", true); // Начать анимацию
             animatorR.SetBool("Going", true); // Начать анимацию
 
-            if (transform.rotation != PathMap[0].Dir)
+            if (transform.rotation.eulerAngles != PathMap[0].Dir.eulerAngles)
             {
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, PathMap[0].Dir, speedRotation);
             }
             else
             {
+                if (!PathISClear() && (PathMap[0].Length > 0.5f))
+                    PathMap[0] = new Map(PathMap[0].Dir, 0);
+
                 if (PathMap[0].Length > 0)
                 {
                     Map curPath = PathMap[0];
@@ -174,7 +192,7 @@ public class Movement : MonoBehaviour
                     {
                         transform.rotation = Calibrate(transform.rotation);
                         transform.position = Calibrate(transform.position);
-                        
+
                         PathMap.RemoveAt(0);
 
                         animatorL.SetBool("Going", false); // Остановить анимацию
